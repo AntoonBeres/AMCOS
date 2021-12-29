@@ -2,15 +2,10 @@ use chrono::naive::NaiveDate;
 use rand::prelude::*;
 use rand_distr::{Normal, Distribution};
 use serde::Deserialize;
-const MC_RATE: u64 = 3;
 use std::fs::File;
 use std::error::Error;
 
 use rayon::prelude::*;
-
-
-
-
 
 
 fn mean(data: &Vec<f64>) -> Option<f64> {

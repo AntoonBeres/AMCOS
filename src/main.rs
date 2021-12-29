@@ -1,7 +1,5 @@
 mod stock_option;
-use stock_option::{StockOption, Stock};
-use stock_option::Simulation;
-use stock_option::std_deviation;
+use stock_option::{Stock, Simulation, std_deviation};
 use serde::Deserialize;
 use toml;
 use rgsl::statistics::mean;

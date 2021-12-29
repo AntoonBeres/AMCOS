@@ -114,8 +114,6 @@ impl Stock {
         let mean_volatility = mean(&price_point_change_abs).unwrap();
         let volatility_stdev = std_deviation(&price_point_change_abs).unwrap();
 
-
-
         Stock {
             current_value: current_value,
             basline_growth: 0.0,
@@ -125,26 +123,8 @@ impl Stock {
         }
     }
 
-    fn simulate_step(&self, start_value: f64) -> f64 {
-        
-        0.0
-    }
-
 }
 
-
-pub struct StockOption {
-    //strike_price: f64,
-    pub days_till_expiry: u64,
-    //option_type: OptionType,
-    //underlying: Stock
-}
-
-impl StockOption {
-    fn get_ndays_left(&self) -> u64 {
-        self.days_till_expiry
-    }
-}
 
 pub struct Simulation {
     asset: Stock,
@@ -159,46 +139,13 @@ impl Simulation {
             asset: asset,
         }
     }
-
-    fn simulate_step(&self, startval: f64) -> f64 {
-        startval + self.get_normal(startval)
-    }
-
-    fn simulate_multi_step(&self, startval: f64, n_steps: u32) -> f64{
-        let mut val = startval;
-        for i in 0..n_steps{
-            val = self.simulate_step(val);
-        }
-        val
-    }
-
-    pub fn simulate_multi_run(&self, startval: f64, n_steps: u32, n_runs: u64) -> Vec<f64> {
-        let mut result:Vec<f64> = Vec::new();
-        for i in 0..n_runs{
-            result.push(self.simulate_multi_step(startval, n_steps))
-        }
-        result
-    }
-
-    fn get_normal(&self, startval: f64) -> f64 {
-        let mut rng = thread_rng();
-        let i: f64 = match rng.gen::<bool>() {
-            true => 1.0,
-            false => -1.0
-        };
-        i* startval * self.norm.sample(&mut rng)
-    }
-
     pub fn rayon_multi_run(&self, n_steps: u32, n_runs: u64) -> Vec<f64> {
         let startval = self.asset.current_value;
         let mut result:Vec<f64> = vec![startval; n_runs as usize];
         let volatility = self.asset.volatility;
         let stdev_volatility = self.asset.volatility_stdev;
 
-
-
         let risk_free_rate = self.asset.basline_growth;
-
         
         result.par_iter_mut().for_each(|x| {
             let mut rng = thread_rng();

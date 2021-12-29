@@ -5,3 +5,14 @@ Written in Rust ofcourse!
 
 
 Work in progress. Currently has only minimal functionality. 
+
+build instructions:
+
+`cargo build --release`
+
+Usege: 
+`./AMCOS <CONFIG_FILE>`
+
+example:
+`./AMCOS config.toml`
+

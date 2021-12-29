@@ -33,10 +33,6 @@ pub fn std_deviation(data: &Vec<f64>) -> Option<f64> {
     }
 }
 
-
-
-
-
 pub enum OptionType {
     Call,
     Put

@@ -4,6 +4,7 @@ use serde::Deserialize;
 use toml;
 use rgsl::statistics::mean;
 use std::fs::File;
+use std::env;
 
 extern crate time;
 use time::PreciseTime;
@@ -18,8 +19,9 @@ struct Config {
 }
 
 fn main() {
-
-    let file = std::fs::read_to_string("config.toml").unwrap();
+    let args: Vec<String> = env::args().collect();
+    let config_filename = &args[1];
+    let file = std::fs::read_to_string(config_filename).unwrap();
     let config: Config = toml::from_str(file.as_str()).unwrap();
 
 

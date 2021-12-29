@@ -1,0 +1,5 @@
+filename = "RKLB.csv"   #source data
+time_steps = 30     #how much in the future to simulate, usually amount of days till expiration
+history = 20        #amount of past datapoints to use to estimate volatility
+iterations = 10_000_000     #amount of iterations, higher means more accurate, but longer calculations
+strike_price = 10.0     #expiration strike price

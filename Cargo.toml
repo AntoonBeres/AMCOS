@@ -14,3 +14,4 @@ csv = "1.1"
 serde = { version = "1", features = ["derive"] }
 GSL = "6.0"
 rayon = "1.5"
+toml = "0.5.8"

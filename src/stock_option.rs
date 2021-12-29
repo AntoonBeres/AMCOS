@@ -83,9 +83,7 @@ fn read_stock_data_set_from_csv(file_path: &str) -> Result<StockDataSet,Box<dyn 
 
 pub struct Stock {
     pub current_value: f64,
-
     basline_growth: f64,
-
     pub volatility: f64,
     pub volatility_stdev: f64,
 
@@ -102,14 +100,19 @@ impl Stock {
             price_points.push(record.close);
         }
 
+        let mut price_point_change_abs: Vec<f64> = Vec::new();
         let mut price_point_change: Vec<f64> = Vec::new();
         for i in 0..(price_points.len()-1){
-            price_point_change.push( ((price_points[i]-price_points[i+1]).abs())/price_points[i]  );
+            price_point_change_abs.push( ((price_points[i]-price_points[i+1]).abs())/price_points[i]  );
         }
 
+        /*let total_interest_rate = ((price_points.last().unwrap())/(price_points.first().unwrap()));
+        println!("total rate {}", total_interest_rate-1.0);
+        let basline_growth = (f64::powf(total_interest_rate.abs(), (1.0/(price_points.len() as f64)))) - 1.0;
+        println!("total rate {}", basline_growth);*/
 
-        let mean_volatility = mean(&price_point_change).unwrap();
-        let volatility_stdev = std_deviation(&price_point_change).unwrap();
+        let mean_volatility = mean(&price_point_change_abs).unwrap();
+        let volatility_stdev = std_deviation(&price_point_change_abs).unwrap();
 
 
 
@@ -188,10 +191,14 @@ impl Simulation {
 
     pub fn rayon_multi_run(&self, n_steps: u32, n_runs: u64) -> Vec<f64> {
         let startval = self.asset.current_value;
-        
         let mut result:Vec<f64> = vec![startval; n_runs as usize];
         let volatility = self.asset.volatility;
         let stdev_volatility = self.asset.volatility_stdev;
+
+
+
+        let risk_free_rate = self.asset.basline_growth;
+
         
         result.par_iter_mut().for_each(|x| {
             let mut rng = thread_rng();
@@ -202,7 +209,7 @@ impl Simulation {
             let normal_dist: Normal<f64> = Normal::new(volatility, stdev_volatility).unwrap(); 
             let mut norm = i* startval * normal_dist.sample(&mut rng);
             for _i in 0..n_steps {
-                *x = *x + norm;
+                *x = *x + norm /*+ (*x * risk_free_rate)*/;
                 norm = i * *x * normal_dist.sample(&mut rng);
                 i = match rng.gen::<bool>() {
                     true => 1.0,

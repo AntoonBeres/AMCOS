@@ -10,9 +10,11 @@ build instructions:
 
 `cargo build --release`
 
-Usege: 
+Usage: 
+
 `./AMCOS <CONFIG_FILE>`
 
 example:
+
 `./AMCOS config.toml`
 

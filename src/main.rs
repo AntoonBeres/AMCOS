@@ -21,13 +21,17 @@ struct Config {
 fn main() {
     let args: Vec<String> = env::args().collect();
 
+    if args.len() < 2 {
+        println!("TODO USAGE");
+        std::process::exit(1);
+    }
+    
     let ticker = &args[1];
-    let strike = &args[2];
+    let strike_price = &args[2];
     let days_till_expiry = &args[3];
     let days_till_expiry: u32 = days_till_expiry.parse().unwrap();
 
-
-    let strike_price: f64 = strike.parse().unwrap();
+    let strike_price: f64 = strike_price.parse().unwrap();
 
     let current_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
     let year_ago = current_time - 31536000;

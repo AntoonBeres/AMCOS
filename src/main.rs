@@ -1,32 +1,80 @@
 mod stock_option;
-use stock_option::{Stock, Simulation, std_deviation};
+use stock_option::{Stock, Simulation};
 use serde::Deserialize;
 use toml;
-use rgsl::statistics::mean;
 use std::fs::File;
 use std::env;
+use std::time::{SystemTime, UNIX_EPOCH, Duration};
+use std::path::Path;
+use std::io::prelude::*;
+
 
 extern crate time;
 use time::PreciseTime;
 
 #[derive(Deserialize)]
 struct Config {
-    filename: String,
     history: Option<usize>,
-    time_steps: u32,
     iterations: Option<u64>,
-    strike_price: f64
 }
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let config_filename = &args[1];
-    let file = std::fs::read_to_string(config_filename).unwrap();
-    let config: Config = toml::from_str(file.as_str()).unwrap();
+
+    let ticker = &args[1];
+    let strike = &args[2];
+    let days_till_expiry = &args[3];
+    let days_till_expiry: u32 = days_till_expiry.parse().unwrap();
 
 
-    let i: Stock = Stock::from_csv(config.filename.as_str(), match config.history {Some(x) => x, _ => 20});
-    let time_steps = config.time_steps;
+    let strike_price: f64 = strike.parse().unwrap();
+
+    let current_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let year_ago = current_time - 31536000;
+    let url_string: String = format!("https://query1.finance.yahoo.com/v7/finance/download/{}?period1={}&period2={}&interval=1d&events=history&includeAdjustedClose=true", ticker, year_ago, current_time);
+
+
+    let filename = format!("./data/{}.csv", ticker);
+    std::fs::create_dir_all("./data").expect("couldn't create data directory");
+
+
+    let download = |filename: &String| {
+        
+            let mut file = match File::create(&filename) {
+                Err(why) => panic!("couldn't create {}", why),
+                Ok(file) => file,
+            };
+        
+            let response = reqwest::blocking::get(url_string).unwrap().bytes().unwrap();
+        
+            file.write_all(&response).expect("Couldn't write downloaded data to file");
+    };
+
+    //let mut download_needed = false;
+    if Path::new(&filename).exists() {
+        let data = std::fs::metadata(&filename).unwrap();
+        let last_acces = data.created().unwrap().duration_since(SystemTime::now()-Duration::from_secs(86400)).unwrap();
+        if last_acces.as_secs() > 86400{
+            std::fs::remove_file(&filename).expect("couldn't delete old data");
+            download(&filename);
+        }
+    } else {
+        download(&filename);
+    }
+
+    
+
+
+
+
+    
+    let config_file = std::fs::read_to_string("config.toml").unwrap();
+    let config: Config = toml::from_str(config_file.as_str()).unwrap();
+
+
+    let i: Stock = Stock::from_csv(&filename, match config.history {Some(x) => x, _ => 20});
+    let time_steps = days_till_expiry;
+    println!("timesteps: {}", time_steps);
     let data_points = match config.iterations{Some(x) => x, _ => 10_000_000};
 
     println!("loaded ticker with data: ");
@@ -37,7 +85,7 @@ fn main() {
     println!("---------------------------------------------------");
     println!("starting simulation:");
     
-    println!("time-steps (amount of days/hours/..): {}\ndata-points (simulation precision): {}", config.time_steps, match config.iterations{Some(x) => x, _ => 10_000_000});
+    println!("time-steps (amount of days/hours/..): {}\ndata-points (simulation precision): {}", days_till_expiry, match config.iterations{Some(x) => x, _ => 10_000_000});
     println!("---------------------------------------------------");
     let sim = Simulation::new(i);
     let start = PreciseTime::now();
@@ -51,11 +99,10 @@ fn main() {
 
     let sum: f64 = result2.iter().sum();
     let avg: f64 = sum/(result2.len() as f64);
-    let std: f64 = std_deviation(&result2).unwrap();
 
-    let strike_price = config.strike_price;
-    let fair_price: f64 = Simulation::fair_price(config.strike_price, &result2);
+    let fair_price: f64 = Simulation::fair_price(strike_price, &result2);
 
 
+    println!("average final value of stock: {}", avg);
     println!("fair price for option with strike_price {}: {}", strike_price,fair_price);
 }

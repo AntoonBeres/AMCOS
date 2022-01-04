@@ -1,5 +1,2 @@
-filename = "RKLB.csv"   #source data
-time_steps = 23     #how much in the future to simulate, usually amount of days till expiration
-history = 60        #amount of past datapoints to use to estimate volatility
+history = 30        #amount of past datapoints to use to estimate volatility
 iterations = 10_000_000     #amount of iterations, higher means more accurate, but longer calculations
-strike_price = 11.0     #expiration strike price

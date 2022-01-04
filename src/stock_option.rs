@@ -1,4 +1,3 @@
-use chrono::naive::NaiveDate;
 use rand::prelude::*;
 use rand_distr::{Normal, Distribution};
 use serde::Deserialize;
@@ -33,6 +32,7 @@ pub fn std_deviation(data: &Vec<f64>) -> Option<f64> {
     }
 }
 
+#[allow(dead_code)]
 pub enum OptionType {
     Call,
     Put
@@ -78,6 +78,7 @@ pub struct Stock {
     pub volatility: f64,
     pub volatility_stdev: f64,
 
+    #[allow(dead_code)]
     price_points_per_day: u64
 }
 
@@ -91,13 +92,16 @@ impl Stock {
             price_points.push(record.close);
         }
 
+        /*let mut price_point_change: Vec<f64> = Vec::new();*/
         let mut price_point_change_abs: Vec<f64> = Vec::new();
-        let mut price_point_change: Vec<f64> = Vec::new();
+        
         for i in 0..(price_points.len()-1){
             price_point_change_abs.push( ((price_points[i]-price_points[i+1]).abs())/price_points[i]  );
         }
 
-        /*let total_interest_rate = ((price_points.last().unwrap())/(price_points.first().unwrap()));
+        
+        /*
+        let total_interest_rate = ((price_points.last().unwrap())/(price_points.first().unwrap()));
         println!("total rate {}", total_interest_rate-1.0);
         let basline_growth = (f64::powf(total_interest_rate.abs(), (1.0/(price_points.len() as f64)))) - 1.0;
         println!("total rate {}", basline_growth);*/
@@ -119,14 +123,12 @@ impl Stock {
 
 pub struct Simulation {
     asset: Stock,
-    norm: Normal<f64>
 }
 
 
 impl Simulation {
     pub fn new(asset: Stock) -> Simulation {
         Simulation{
-            norm: Normal::new(asset.volatility, asset.volatility_stdev).unwrap(),
             asset: asset,
         }
     }
@@ -136,7 +138,7 @@ impl Simulation {
         let volatility = self.asset.volatility;
         let stdev_volatility = self.asset.volatility_stdev;
 
-        let risk_free_rate = self.asset.basline_growth;
+        //let risk_free_rate = self.asset.basline_growth;
         
         result.par_iter_mut().for_each(|x| {
             let mut rng = thread_rng();

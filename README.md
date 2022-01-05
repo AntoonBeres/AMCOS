@@ -16,9 +16,9 @@ build instructions:
 
 Usage: 
 
-`./AMCOS <CONFIG_FILE>`
+`./amcos <TICKER SYMBOL> <STRIKE PRICE> <DAYS TILL EXPIRATION>`
 
 example:
 
-`./AMCOS config.toml`
+`./amcos AAPL 165 20`
 

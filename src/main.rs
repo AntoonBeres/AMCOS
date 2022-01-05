@@ -93,18 +93,15 @@ fn main() {
 
     println!("loaded ticker with data: ");
     println!("----------------------------------------------------------");
-    
     println!("volatility mean: {}\nvolatility stdev: {}\nstarting_price: {}", i.volatility, i.volatility_stdev, i.current_value);
-
     println!("---------------------------------------------------");
     println!("starting simulation:");
-    
     println!("time-steps (amount of days/hours/..): {}\ndata-points (simulation precision): {}", days_till_expiry, match config.iterations{Some(x) => x, _ => 10_000_000});
     println!("---------------------------------------------------");
+
+
     let sim = Simulation::new(i);
-    //let start = PreciseTime::now();
     let result2 = sim.rayon_multi_run(time_steps, data_points);
-    //let end = PreciseTime::now();*/
 
 
     //println!("\n{} seconds for simulation run\n", start.to(end));
